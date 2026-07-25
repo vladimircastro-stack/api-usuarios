@@ -1,23 +1,24 @@
-const express = require("express");
+const express = require('express');
+const pool = require('./db');
 
 const app = express();
 
 const PORT = 3000;
 
-app.get("/", (req, res) => {
-    res.send("API funcionando correctamente");
+app.get('/', (req, res) => {
+    res.send('API funcionando correctamente');
 });
 
-app.get("/usuario", (req, res) => {
-    const usuario = {
-        id: 1,
-        nombre: "Vladimir",
-        profesion: "Desarrollador"
-    };
-
-    res.json(usuario);
+app.get('/usuarios', async (req, res) => {
+    try {
+        const resultado = await pool.query('SELECT * FROM usuarios');
+        res.json(resultado.rows);
+    } catch (error) {
+        console.log(error);
+        res.status(500).send('Error al obtener los usuarios');
+    }
 });
 
 app.listen(PORT, () => {
-    console.log(`Servidor ejecutándose en puerto ${PORT}`);
+    console.log(`Servidor ejecutándose en el puerto ${PORT}`);
 });
