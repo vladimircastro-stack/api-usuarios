@@ -15,16 +15,23 @@ const mostrarUsuarios = async (req, res) => {
 
         const usuarios = await obtenerUsuarios();
 
-        res.json(usuarios);
+        res.json({
+            exito: true,
+            mensaje: "Usuarios encontrados correctamente",
+            datos: usuarios
+        });
 
     } catch (error) {
 
         console.log(error);
-        res.status(500).send('Error al obtener los usuarios');
+
+        res.status(500).json({
+            exito: false,
+            mensaje: "Error al obtener los usuarios"
+        });
 
     }
 };
-
 
 
 // Buscar usuario por ID
@@ -37,17 +44,30 @@ const buscarUsuario = async (req, res) => {
 
 
         if (!usuario) {
-            return res.status(404).send('Usuario no encontrado');
+
+            return res.status(404).json({
+                exito: false,
+                mensaje: "Usuario no encontrado"
+            });
+
         }
 
 
-        res.json(usuario);
+        res.json({
+            exito: true,
+            mensaje: "Usuario encontrado correctamente",
+            datos: usuario
+        });
 
 
     } catch (error) {
 
         console.log(error);
-        res.status(500).send('Error al buscar usuario');
+
+        res.status(500).json({
+            exito: false,
+            mensaje: "Error al buscar usuario"
+        });
 
     }
 };
@@ -56,18 +76,20 @@ const buscarUsuario = async (req, res) => {
 
 // Crear usuario
 const crearUsuarioController = async (req, res) => {
+
     try {
 
         const { nombre, correo, edad } = req.body;
 
 
-        // Verificar si el correo ya existe
+        // Revisar si el correo ya existe
         const usuarioExistente = await buscarUsuarioPorCorreo(correo);
 
 
         if (usuarioExistente) {
 
             return res.status(400).json({
+                exito: false,
                 mensaje: "El correo ya está registrado"
             });
 
@@ -81,29 +103,41 @@ const crearUsuarioController = async (req, res) => {
         );
 
 
-        res.json(usuario);
+        res.status(201).json({
+
+            exito: true,
+            mensaje: "Usuario creado correctamente",
+            datos: usuario
+
+        });
 
 
     } catch (error) {
 
         console.log(error);
-        res.status(500).send('Error al crear usuario');
+
+        res.status(500).json({
+            exito: false,
+            mensaje: "Error al crear usuario"
+        });
 
     }
+
 };
 
 
 
 // Actualizar usuario
 const actualizarUsuarioController = async (req, res) => {
+
     try {
 
         const { id } = req.params;
+
         const { nombre, correo, edad } = req.body;
 
 
-
-        // Verificar si el correo pertenece a otro usuario
+        // Revisar si otro usuario tiene ese correo
         const usuarioExistente = await buscarUsuarioPorCorreoYId(
             correo,
             id
@@ -113,11 +147,11 @@ const actualizarUsuarioController = async (req, res) => {
         if (usuarioExistente) {
 
             return res.status(400).json({
+                exito: false,
                 mensaje: "El correo ya está registrado por otro usuario"
             });
 
         }
-
 
 
         const usuario = await actualizarUsuario(
@@ -128,31 +162,43 @@ const actualizarUsuarioController = async (req, res) => {
         );
 
 
-
         if (!usuario) {
 
-            return res.status(404).send('Usuario no encontrado');
+            return res.status(404).json({
+                exito: false,
+                mensaje: "Usuario no encontrado"
+            });
 
         }
 
 
+        res.json({
 
-        res.json(usuario);
+            exito: true,
+            mensaje: "Usuario actualizado correctamente",
+            datos: usuario
 
+        });
 
 
     } catch (error) {
 
         console.log(error);
-        res.status(500).send('Error al actualizar usuario');
+
+        res.status(500).json({
+            exito: false,
+            mensaje: "Error al actualizar usuario"
+        });
 
     }
+
 };
 
 
 
 // Eliminar usuario
 const eliminarUsuarioController = async (req, res) => {
+
     try {
 
         const { id } = req.params;
@@ -161,36 +207,49 @@ const eliminarUsuarioController = async (req, res) => {
         const usuario = await eliminarUsuario(id);
 
 
-
         if (!usuario) {
 
-            return res.status(404).send('Usuario no encontrado');
+            return res.status(404).json({
+                exito: false,
+                mensaje: "Usuario no encontrado"
+            });
 
         }
 
 
-
         res.json({
-            mensaje: 'Usuario eliminado correctamente',
-            usuario
-        });
 
+            exito: true,
+            mensaje: "Usuario eliminado correctamente",
+            datos: usuario
+
+        });
 
 
     } catch (error) {
 
         console.log(error);
-        res.status(500).send('Error al eliminar usuario');
+
+        res.status(500).json({
+            exito: false,
+            mensaje: "Error al eliminar usuario"
+        });
 
     }
+
 };
 
 
 
 module.exports = {
+
     mostrarUsuarios,
     buscarUsuario,
+
     crearUsuario: crearUsuarioController,
+
     actualizarUsuario: actualizarUsuarioController,
+
     eliminarUsuario: eliminarUsuarioController
+
 };
