@@ -11,7 +11,7 @@ app.get('/', (req, res) => {
     res.send('API funcionando correctamente');
 });
 
-// Mostrar usuarios
+// Mostrar todos los usuarios
 app.get('/usuarios', async (req, res) => {
     try {
         const resultado = await pool.query('SELECT * FROM usuarios');
@@ -20,6 +20,28 @@ app.get('/usuarios', async (req, res) => {
     } catch (error) {
         console.log(error);
         res.status(500).send('Error al obtener los usuarios');
+    }
+});
+
+// Buscar usuario por ID
+app.get('/usuarios/:id', async (req, res) => {
+    try {
+        const { id } = req.params;
+
+        const resultado = await pool.query(
+            'SELECT * FROM usuarios WHERE id = $1',
+            [id]
+        );
+
+        if (resultado.rows.length === 0) {
+            return res.status(404).send('Usuario no encontrado');
+        }
+
+        res.json(resultado.rows[0]);
+
+    } catch (error) {
+        console.log(error);
+        res.status(500).send('Error al buscar usuario');
     }
 });
 
