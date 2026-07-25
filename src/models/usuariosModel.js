@@ -34,6 +34,23 @@ const buscarUsuarioPorId = async (id) => {
 };
 
 
+// Buscar usuario por correo
+const buscarUsuarioPorCorreo = async (correo) => {
+    try {
+        const resultado = await pool.query(
+            'SELECT * FROM usuarios WHERE correo = $1',
+            [correo]
+        );
+
+        return resultado.rows[0];
+
+    } catch (error) {
+        console.log(error);
+        throw error;
+    }
+};
+
+
 // Crear usuario
 const crearUsuario = async (nombre, correo, edad) => {
     try {
@@ -68,9 +85,28 @@ const actualizarUsuario = async (id, nombre, correo, edad) => {
 };
 
 
+// Eliminar usuario
+const eliminarUsuario = async (id) => {
+    try {
+        const resultado = await pool.query(
+            'DELETE FROM usuarios WHERE id = $1 RETURNING *',
+            [id]
+        );
+
+        return resultado.rows[0];
+
+    } catch (error) {
+        console.log(error);
+        throw error;
+    }
+};
+
+
 module.exports = {
     obtenerUsuarios,
     buscarUsuarioPorId,
+    buscarUsuarioPorCorreo,
     crearUsuario,
-    actualizarUsuario
+    actualizarUsuario,
+    eliminarUsuario
 };

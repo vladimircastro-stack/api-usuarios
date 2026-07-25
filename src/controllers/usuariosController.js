@@ -1,8 +1,7 @@
-const pool = require('../db');
-
 const {
     obtenerUsuarios,
     buscarUsuarioPorId,
+    buscarUsuarioPorCorreo,
     crearUsuario,
     actualizarUsuario,
     eliminarUsuario
@@ -48,13 +47,27 @@ const crearUsuarioController = async (req, res) => {
     try {
         const { nombre, correo, edad } = req.body;
 
+
+        // Verificar si el correo ya existe
+        const usuarioExistente = await buscarUsuarioPorCorreo(correo);
+
+
+        if (usuarioExistente) {
+            return res.status(400).json({
+                mensaje: "El correo ya está registrado"
+            });
+        }
+
+
         const usuario = await crearUsuario(
             nombre,
             correo,
             edad
         );
 
+
         res.json(usuario);
+
 
     } catch (error) {
         console.log(error);
@@ -102,7 +115,7 @@ const eliminarUsuarioController = async (req, res) => {
 
         res.json({
             mensaje: 'Usuario eliminado correctamente',
-            usuario: usuario
+            usuario
         });
 
     } catch (error) {
