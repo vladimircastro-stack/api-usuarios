@@ -51,6 +51,28 @@ const buscarUsuarioPorCorreo = async (correo) => {
 };
 
 
+// Buscar usuario por correo excluyendo un ID
+const buscarUsuarioPorCorreoYId = async (correo, id) => {
+    try {
+
+        const resultado = await pool.query(
+            'SELECT * FROM usuarios WHERE correo = $1 AND id <> $2',
+            [correo, Number(id)]
+        );
+
+
+        return resultado.rows[0];
+
+
+    } catch (error) {
+
+        console.log(error);
+        throw error;
+
+    }
+};
+
+
 // Crear usuario
 const crearUsuario = async (nombre, correo, edad) => {
     try {
@@ -106,6 +128,7 @@ module.exports = {
     obtenerUsuarios,
     buscarUsuarioPorId,
     buscarUsuarioPorCorreo,
+    buscarUsuarioPorCorreoYId,
     crearUsuario,
     actualizarUsuario,
     eliminarUsuario
