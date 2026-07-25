@@ -15,11 +15,13 @@ const usuariosRoutes = require('./routes/usuarios');
 app.use('/', usuariosRoutes);
 
 
+// Ruta principal
 app.get('/', (req, res) => {
     res.send('API funcionando correctamente');
 });
 
 
+// Encender servidor
 app.listen(PORT, () => {
     console.log(`Servidor ejecutándose en el puerto ${PORT}`);
 });
