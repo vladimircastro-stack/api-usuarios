@@ -1,0 +1,76 @@
+const pool = require('../db');
+
+
+// Obtener todos los usuarios
+const obtenerUsuarios = async () => {
+    try {
+        const resultado = await pool.query(
+            'SELECT * FROM usuarios'
+        );
+
+        return resultado.rows;
+
+    } catch (error) {
+        console.log(error);
+        throw error;
+    }
+};
+
+
+// Buscar usuario por ID
+const buscarUsuarioPorId = async (id) => {
+    try {
+        const resultado = await pool.query(
+            'SELECT * FROM usuarios WHERE id = $1',
+            [id]
+        );
+
+        return resultado.rows[0];
+
+    } catch (error) {
+        console.log(error);
+        throw error;
+    }
+};
+
+
+// Crear usuario
+const crearUsuario = async (nombre, correo, edad) => {
+    try {
+        const resultado = await pool.query(
+            'INSERT INTO usuarios (nombre, correo, edad) VALUES ($1, $2, $3) RETURNING *',
+            [nombre, correo, edad]
+        );
+
+        return resultado.rows[0];
+
+    } catch (error) {
+        console.log(error);
+        throw error;
+    }
+};
+
+
+// Actualizar usuario
+const actualizarUsuario = async (id, nombre, correo, edad) => {
+    try {
+        const resultado = await pool.query(
+            'UPDATE usuarios SET nombre=$1, correo=$2, edad=$3 WHERE id=$4 RETURNING *',
+            [nombre, correo, edad, id]
+        );
+
+        return resultado.rows[0];
+
+    } catch (error) {
+        console.log(error);
+        throw error;
+    }
+};
+
+
+module.exports = {
+    obtenerUsuarios,
+    buscarUsuarioPorId,
+    crearUsuario,
+    actualizarUsuario
+};

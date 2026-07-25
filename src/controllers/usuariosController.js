@@ -1,11 +1,20 @@
 const pool = require('../db');
 
+const {
+    obtenerUsuarios,
+    buscarUsuarioPorId,
+    crearUsuario,
+    actualizarUsuario,
+    eliminarUsuario
+} = require('../models/usuariosModel');
+
 
 // Mostrar todos los usuarios
 const mostrarUsuarios = async (req, res) => {
     try {
-        const resultado = await pool.query('SELECT * FROM usuarios');
-        res.json(resultado.rows);
+        const usuarios = await obtenerUsuarios();
+
+        res.json(usuarios);
 
     } catch (error) {
         console.log(error);
@@ -19,16 +28,13 @@ const buscarUsuario = async (req, res) => {
     try {
         const { id } = req.params;
 
-        const resultado = await pool.query(
-            'SELECT * FROM usuarios WHERE id = $1',
-            [id]
-        );
+        const usuario = await buscarUsuarioPorId(id);
 
-        if (resultado.rows.length === 0) {
+        if (!usuario) {
             return res.status(404).send('Usuario no encontrado');
         }
 
-        res.json(resultado.rows[0]);
+        res.json(usuario);
 
     } catch (error) {
         console.log(error);
@@ -38,16 +44,17 @@ const buscarUsuario = async (req, res) => {
 
 
 // Crear usuario
-const crearUsuario = async (req, res) => {
+const crearUsuarioController = async (req, res) => {
     try {
         const { nombre, correo, edad } = req.body;
 
-        const resultado = await pool.query(
-            'INSERT INTO usuarios (nombre, correo, edad) VALUES ($1, $2, $3) RETURNING *',
-            [nombre, correo, edad]
+        const usuario = await crearUsuario(
+            nombre,
+            correo,
+            edad
         );
 
-        res.json(resultado.rows[0]);
+        res.json(usuario);
 
     } catch (error) {
         console.log(error);
@@ -57,21 +64,23 @@ const crearUsuario = async (req, res) => {
 
 
 // Actualizar usuario
-const actualizarUsuario = async (req, res) => {
+const actualizarUsuarioController = async (req, res) => {
     try {
         const { id } = req.params;
         const { nombre, correo, edad } = req.body;
 
-        const resultado = await pool.query(
-            'UPDATE usuarios SET nombre=$1, correo=$2, edad=$3 WHERE id=$4 RETURNING *',
-            [nombre, correo, edad, id]
+        const usuario = await actualizarUsuario(
+            id,
+            nombre,
+            correo,
+            edad
         );
 
-        if (resultado.rows.length === 0) {
+        if (!usuario) {
             return res.status(404).send('Usuario no encontrado');
         }
 
-        res.json(resultado.rows[0]);
+        res.json(usuario);
 
     } catch (error) {
         console.log(error);
@@ -81,22 +90,19 @@ const actualizarUsuario = async (req, res) => {
 
 
 // Eliminar usuario
-const eliminarUsuario = async (req, res) => {
+const eliminarUsuarioController = async (req, res) => {
     try {
         const { id } = req.params;
 
-        const resultado = await pool.query(
-            'DELETE FROM usuarios WHERE id = $1 RETURNING *',
-            [id]
-        );
+        const usuario = await eliminarUsuario(id);
 
-        if (resultado.rows.length === 0) {
+        if (!usuario) {
             return res.status(404).send('Usuario no encontrado');
         }
 
         res.json({
             mensaje: 'Usuario eliminado correctamente',
-            usuario: resultado.rows[0]
+            usuario: usuario
         });
 
     } catch (error) {
@@ -109,7 +115,7 @@ const eliminarUsuario = async (req, res) => {
 module.exports = {
     mostrarUsuarios,
     buscarUsuario,
-    crearUsuario,
-    actualizarUsuario,
-    eliminarUsuario
+    crearUsuario: crearUsuarioController,
+    actualizarUsuario: actualizarUsuarioController,
+    eliminarUsuario: eliminarUsuarioController
 };
