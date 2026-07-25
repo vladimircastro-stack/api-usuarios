@@ -63,6 +63,54 @@ app.post('/usuarios', async (req, res) => {
     }
 });
 
+// Actualizar usuario
+app.put('/usuarios/:id', async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { nombre, correo, edad } = req.body;
+
+        const resultado = await pool.query(
+            'UPDATE usuarios SET nombre=$1, correo=$2, edad=$3 WHERE id=$4 RETURNING *',
+            [nombre, correo, edad, id]
+        );
+
+        if (resultado.rows.length === 0) {
+            return res.status(404).send('Usuario no encontrado');
+        }
+
+        res.json(resultado.rows[0]);
+
+    } catch (error) {
+        console.log(error);
+        res.status(500).send('Error al actualizar usuario');
+    }
+});
+
+// Eliminar usuario
+app.delete('/usuarios/:id', async (req, res) => {
+    try {
+        const { id } = req.params;
+
+        const resultado = await pool.query(
+            'DELETE FROM usuarios WHERE id = $1 RETURNING *',
+            [id]
+        );
+
+        if (resultado.rows.length === 0) {
+            return res.status(404).send('Usuario no encontrado');
+        }
+
+        res.json({
+            mensaje: 'Usuario eliminado correctamente',
+            usuario: resultado.rows[0]
+        });
+
+    } catch (error) {
+        console.log(error);
+        res.status(500).send('Error al eliminar usuario');
+    }
+});
+
 app.listen(PORT, () => {
     console.log(`Servidor ejecutándose en el puerto ${PORT}`);
 });
