@@ -1,3 +1,5 @@
+const bcrypt = require('bcrypt');
+
 const {
     obtenerUsuarios,
     buscarUsuarioPorId,
@@ -11,6 +13,7 @@ const {
 
 // Mostrar todos los usuarios
 const mostrarUsuarios = async (req, res) => {
+
     try {
 
         const usuarios = await obtenerUsuarios();
@@ -27,15 +30,17 @@ const mostrarUsuarios = async (req, res) => {
 
         res.status(500).json({
             exito: false,
-            mensaje: "Error al obtener los usuarios"
+            mensaje: "Error al obtener usuarios"
         });
 
     }
+
 };
 
 
 // Buscar usuario por ID
 const buscarUsuario = async (req, res) => {
+
     try {
 
         const { id } = req.params;
@@ -70,6 +75,7 @@ const buscarUsuario = async (req, res) => {
         });
 
     }
+
 };
 
 
@@ -79,10 +85,10 @@ const crearUsuarioController = async (req, res) => {
 
     try {
 
-        const { nombre, correo, edad } = req.body;
+        const { nombre, correo, edad, password } = req.body;
 
 
-        // Revisar si el correo ya existe
+        // Verificar correo existente
         const usuarioExistente = await buscarUsuarioPorCorreo(correo);
 
 
@@ -96,10 +102,16 @@ const crearUsuarioController = async (req, res) => {
         }
 
 
+        // Encriptar contraseña
+        const passwordEncriptada = await bcrypt.hash(password, 10);
+
+
+
         const usuario = await crearUsuario(
             nombre,
             correo,
-            edad
+            edad,
+            passwordEncriptada
         );
 
 
@@ -134,10 +146,11 @@ const actualizarUsuarioController = async (req, res) => {
 
         const { id } = req.params;
 
-        const { nombre, correo, edad } = req.body;
+        const { nombre, correo, edad, password } = req.body;
 
 
-        // Revisar si otro usuario tiene ese correo
+
+        // Verificar correo duplicado
         const usuarioExistente = await buscarUsuarioPorCorreoYId(
             correo,
             id
@@ -154,12 +167,20 @@ const actualizarUsuarioController = async (req, res) => {
         }
 
 
+
+        // Encriptar nueva contraseña
+        const passwordEncriptada = await bcrypt.hash(password, 10);
+
+
+
         const usuario = await actualizarUsuario(
             id,
             nombre,
             correo,
-            edad
+            edad,
+            passwordEncriptada
         );
+
 
 
         if (!usuario) {
@@ -172,6 +193,7 @@ const actualizarUsuarioController = async (req, res) => {
         }
 
 
+
         res.json({
 
             exito: true,
@@ -181,9 +203,11 @@ const actualizarUsuarioController = async (req, res) => {
         });
 
 
+
     } catch (error) {
 
         console.log(error);
+
 
         res.status(500).json({
             exito: false,
@@ -226,9 +250,11 @@ const eliminarUsuarioController = async (req, res) => {
         });
 
 
+
     } catch (error) {
 
         console.log(error);
+
 
         res.status(500).json({
             exito: false,

@@ -20,7 +20,7 @@ router.get('/usuarios', mostrarUsuarios);
 router.get('/usuarios/:id', buscarUsuario);
 
 
-// Crear usuario con validación
+// Crear usuario
 router.post('/usuarios', validarUsuario, crearUsuario);
 
 
