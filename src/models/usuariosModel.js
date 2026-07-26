@@ -161,6 +161,29 @@ const eliminarUsuario = async (id) => {
 
 
 
+// Buscar usuario para login
+const loginUsuario = async (correo) => {
+
+    try {
+
+        const resultado = await pool.query(
+            'SELECT * FROM usuarios WHERE correo = $1',
+            [correo]
+        );
+
+        return resultado.rows[0];
+
+    } catch (error) {
+
+        console.log(error);
+        throw error;
+
+    }
+
+};
+
+
+
 // Exportar funciones
 module.exports = {
 
@@ -170,6 +193,7 @@ module.exports = {
     buscarUsuarioPorCorreoYId,
     crearUsuario,
     actualizarUsuario,
-    eliminarUsuario
+    eliminarUsuario,
+    loginUsuario
 
 };

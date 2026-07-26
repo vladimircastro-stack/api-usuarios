@@ -7,8 +7,10 @@ const {
     buscarUsuarioPorCorreoYId,
     crearUsuario,
     actualizarUsuario,
-    eliminarUsuario
+    eliminarUsuario,
+    loginUsuario
 } = require('../models/usuariosModel');
+
 
 
 // Mostrar todos los usuarios
@@ -36,6 +38,7 @@ const mostrarUsuarios = async (req, res) => {
     }
 
 };
+
 
 
 // Buscar usuario por ID
@@ -88,7 +91,6 @@ const crearUsuarioController = async (req, res) => {
         const { nombre, correo, edad, password } = req.body;
 
 
-        // Verificar correo existente
         const usuarioExistente = await buscarUsuarioPorCorreo(correo);
 
 
@@ -102,9 +104,7 @@ const crearUsuarioController = async (req, res) => {
         }
 
 
-        // Encriptar contraseña
         const passwordEncriptada = await bcrypt.hash(password, 10);
-
 
 
         const usuario = await crearUsuario(
@@ -149,8 +149,6 @@ const actualizarUsuarioController = async (req, res) => {
         const { nombre, correo, edad, password } = req.body;
 
 
-
-        // Verificar correo duplicado
         const usuarioExistente = await buscarUsuarioPorCorreoYId(
             correo,
             id
@@ -167,10 +165,7 @@ const actualizarUsuarioController = async (req, res) => {
         }
 
 
-
-        // Encriptar nueva contraseña
         const passwordEncriptada = await bcrypt.hash(password, 10);
-
 
 
         const usuario = await actualizarUsuario(
@@ -182,7 +177,6 @@ const actualizarUsuarioController = async (req, res) => {
         );
 
 
-
         if (!usuario) {
 
             return res.status(404).json({
@@ -191,7 +185,6 @@ const actualizarUsuarioController = async (req, res) => {
             });
 
         }
-
 
 
         res.json({
@@ -267,6 +260,75 @@ const eliminarUsuarioController = async (req, res) => {
 
 
 
+// Login de usuario
+const loginUsuarioController = async (req, res) => {
+
+    try {
+
+        const { correo, password } = req.body;
+
+
+        const usuario = await loginUsuario(correo);
+
+
+        if (!usuario) {
+
+            return res.status(404).json({
+                exito: false,
+                mensaje: "Usuario no encontrado"
+            });
+
+        }
+
+
+        const passwordCorrecta = await bcrypt.compare(
+            password,
+            usuario.password
+        );
+
+
+        if (!passwordCorrecta) {
+
+            return res.status(400).json({
+                exito: false,
+                mensaje: "Contraseña incorrecta"
+            });
+
+        }
+
+
+        res.json({
+
+            exito: true,
+            mensaje: "Inicio de sesión correcto",
+
+            usuario: {
+                id: usuario.id,
+                nombre: usuario.nombre,
+                correo: usuario.correo,
+                edad: usuario.edad
+            }
+
+        });
+
+
+    } catch (error) {
+
+        console.log(error);
+
+
+        res.status(500).json({
+            exito: false,
+            mensaje: "Error al iniciar sesión"
+        });
+
+    }
+
+};
+
+
+
+
 module.exports = {
 
     mostrarUsuarios,
@@ -276,6 +338,8 @@ module.exports = {
 
     actualizarUsuario: actualizarUsuarioController,
 
-    eliminarUsuario: eliminarUsuarioController
+    eliminarUsuario: eliminarUsuarioController,
+
+    loginUsuario: loginUsuarioController
 
 };
