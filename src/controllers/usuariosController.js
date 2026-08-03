@@ -1,5 +1,10 @@
 const bcrypt = require('bcrypt');
-
+const jwt = require('jsonwebtoken');
+const jwtConfig = require('../config/jwt');
+const AppError = require('../utils/AppError');
+const asyncHandler = require('../utils/asyncHandler');
+const { sendSuccess } = require('../utils/response');
+const { limpiarUsuario } = require('../utils/usuarioHelpers');
 const {
     obtenerUsuarios,
     buscarUsuarioPorId,
@@ -11,335 +16,136 @@ const {
     loginUsuario
 } = require('../models/usuariosModel');
 
+const mostrarUsuarios = asyncHandler(async (req, res) => {
+    const usuarios = await obtenerUsuarios();
+    sendSuccess(res, {
+        mensaje: 'Usuarios encontrados correctamente',
+        datos: usuarios.map(limpiarUsuario)
+    });
+});
 
+const buscarUsuario = asyncHandler(async (req, res) => {
+    const usuario = await buscarUsuarioPorId(req.params.id);
 
-// Mostrar todos los usuarios
-const mostrarUsuarios = async (req, res) => {
-
-    try {
-
-        const usuarios = await obtenerUsuarios();
-
-        res.json({
-            exito: true,
-            mensaje: "Usuarios encontrados correctamente",
-            datos: usuarios
-        });
-
-    } catch (error) {
-
-        console.log(error);
-
-        res.status(500).json({
-            exito: false,
-            mensaje: "Error al obtener usuarios"
-        });
-
+    if (!usuario) {
+        throw new AppError('Usuario no encontrado', 404);
     }
 
-};
+    sendSuccess(res, {
+        mensaje: 'Usuario encontrado correctamente',
+        datos: limpiarUsuario(usuario)
+    });
+});
 
+const crearUsuarioController = asyncHandler(async (req, res) => {
+    const { nombre, correo, edad, password } = req.body;
+    const existe = await buscarUsuarioPorCorreo(correo);
 
-
-// Buscar usuario por ID
-const buscarUsuario = async (req, res) => {
-
-    try {
-
-        const { id } = req.params;
-
-        const usuario = await buscarUsuarioPorId(id);
-
-
-        if (!usuario) {
-
-            return res.status(404).json({
-                exito: false,
-                mensaje: "Usuario no encontrado"
-            });
-
-        }
-
-
-        res.json({
-            exito: true,
-            mensaje: "Usuario encontrado correctamente",
-            datos: usuario
-        });
-
-
-    } catch (error) {
-
-        console.log(error);
-
-        res.status(500).json({
-            exito: false,
-            mensaje: "Error al buscar usuario"
-        });
-
+    if (existe) {
+        throw new AppError('El correo ya está registrado', 400);
     }
 
-};
+    const passwordEncriptada = await bcrypt.hash(password, 10);
+    const usuario = await crearUsuario(nombre, correo, edad, passwordEncriptada);
 
+    sendSuccess(res, {
+        mensaje: 'Usuario creado correctamente',
+        datos: limpiarUsuario(usuario),
+        statusCode: 201
+    });
+});
 
+const actualizarUsuarioController = asyncHandler(async (req, res) => {
+    const id = Number(req.params.id);
+    const { nombre, correo, edad, password } = req.body;
 
-// Crear usuario
-const crearUsuarioController = async (req, res) => {
+    const usuarioActual = await buscarUsuarioPorId(id);
 
-    try {
-
-        const { nombre, correo, edad, password } = req.body;
-
-
-        const usuarioExistente = await buscarUsuarioPorCorreo(correo);
-
-
-        if (usuarioExistente) {
-
-            return res.status(400).json({
-                exito: false,
-                mensaje: "El correo ya está registrado"
-            });
-
-        }
-
-
-        const passwordEncriptada = await bcrypt.hash(password, 10);
-
-
-        const usuario = await crearUsuario(
-            nombre,
-            correo,
-            edad,
-            passwordEncriptada
-        );
-
-
-        res.status(201).json({
-
-            exito: true,
-            mensaje: "Usuario creado correctamente",
-            datos: usuario
-
-        });
-
-
-    } catch (error) {
-
-        console.log(error);
-
-        res.status(500).json({
-            exito: false,
-            mensaje: "Error al crear usuario"
-        });
-
+    if (!usuarioActual) {
+        throw new AppError('Usuario no encontrado', 404);
     }
 
-};
+    const correoDuplicado = await buscarUsuarioPorCorreoYId(correo, id);
 
-
-
-// Actualizar usuario
-const actualizarUsuarioController = async (req, res) => {
-
-    try {
-
-        const { id } = req.params;
-
-        const { nombre, correo, edad, password } = req.body;
-
-
-        const usuarioExistente = await buscarUsuarioPorCorreoYId(
-            correo,
-            id
-        );
-
-
-        if (usuarioExistente) {
-
-            return res.status(400).json({
-                exito: false,
-                mensaje: "El correo ya está registrado por otro usuario"
-            });
-
-        }
-
-
-        const passwordEncriptada = await bcrypt.hash(password, 10);
-
-
-        const usuario = await actualizarUsuario(
-            id,
-            nombre,
-            correo,
-            edad,
-            passwordEncriptada
-        );
-
-
-        if (!usuario) {
-
-            return res.status(404).json({
-                exito: false,
-                mensaje: "Usuario no encontrado"
-            });
-
-        }
-
-
-        res.json({
-
-            exito: true,
-            mensaje: "Usuario actualizado correctamente",
-            datos: usuario
-
-        });
-
-
-
-    } catch (error) {
-
-        console.log(error);
-
-
-        res.status(500).json({
-            exito: false,
-            mensaje: "Error al actualizar usuario"
-        });
-
+    if (correoDuplicado) {
+        throw new AppError('El correo ya está registrado por otro usuario', 400);
     }
 
-};
+    let passwordNueva;
 
-
-
-// Eliminar usuario
-const eliminarUsuarioController = async (req, res) => {
-
-    try {
-
-        const { id } = req.params;
-
-
-        const usuario = await eliminarUsuario(id);
-
-
-        if (!usuario) {
-
-            return res.status(404).json({
-                exito: false,
-                mensaje: "Usuario no encontrado"
-            });
-
-        }
-
-
-        res.json({
-
-            exito: true,
-            mensaje: "Usuario eliminado correctamente",
-            datos: usuario
-
-        });
-
-
-
-    } catch (error) {
-
-        console.log(error);
-
-
-        res.status(500).json({
-            exito: false,
-            mensaje: "Error al eliminar usuario"
-        });
-
+    if (password) {
+        passwordNueva = await bcrypt.hash(password, 10);
     }
 
-};
+    const usuario = await actualizarUsuario(
+        id,
+        nombre,
+        correo,
+        edad,
+        passwordNueva
+    );
 
+    sendSuccess(res, {
+        mensaje: 'Usuario actualizado correctamente',
+        datos: limpiarUsuario(usuario)
+    });
+});
 
+const eliminarUsuarioController = asyncHandler(async (req, res) => {
+    const usuario = await eliminarUsuario(req.params.id);
 
-// Login de usuario
-const loginUsuarioController = async (req, res) => {
-
-    try {
-
-        const { correo, password } = req.body;
-
-
-        const usuario = await loginUsuario(correo);
-
-
-        if (!usuario) {
-
-            return res.status(404).json({
-                exito: false,
-                mensaje: "Usuario no encontrado"
-            });
-
-        }
-
-
-        const passwordCorrecta = await bcrypt.compare(
-            password,
-            usuario.password
-        );
-
-
-        if (!passwordCorrecta) {
-
-            return res.status(400).json({
-                exito: false,
-                mensaje: "Contraseña incorrecta"
-            });
-
-        }
-
-
-        res.json({
-
-            exito: true,
-            mensaje: "Inicio de sesión correcto",
-
-            usuario: {
-                id: usuario.id,
-                nombre: usuario.nombre,
-                correo: usuario.correo,
-                edad: usuario.edad
-            }
-
-        });
-
-
-    } catch (error) {
-
-        console.log(error);
-
-
-        res.status(500).json({
-            exito: false,
-            mensaje: "Error al iniciar sesión"
-        });
-
+    if (!usuario) {
+        throw new AppError('Usuario no encontrado', 404);
     }
 
-};
+    sendSuccess(res, {
+        mensaje: 'Usuario eliminado correctamente',
+        datos: limpiarUsuario(usuario)
+    });
+});
 
+const loginUsuarioController = asyncHandler(async (req, res) => {
+    const { correo, password } = req.body;
+    const usuario = await loginUsuario(correo);
 
+    const correcto = usuario
+        ? await bcrypt.compare(password, usuario.password)
+        : false;
 
+    if (!usuario || !correcto) {
+        throw new AppError('Credenciales inválidas', 401);
+    }
+
+    const token = jwt.sign(
+        {
+            id: usuario.id,
+            correo: usuario.correo,
+            rol: usuario.rol
+        },
+        jwtConfig.secret,
+        {
+            expiresIn: jwtConfig.expires
+        }
+    );
+
+    sendSuccess(res, {
+        mensaje: 'Inicio de sesión correcto',
+        token,
+        usuario: {
+            id: usuario.id,
+            nombre: usuario.nombre,
+            correo: usuario.correo,
+            edad: usuario.edad,
+            rol: usuario.rol
+        }
+    });
+});
 
 module.exports = {
-
     mostrarUsuarios,
     buscarUsuario,
-
     crearUsuario: crearUsuarioController,
-
     actualizarUsuario: actualizarUsuarioController,
-
     eliminarUsuario: eliminarUsuarioController,
-
     loginUsuario: loginUsuarioController
-
 };

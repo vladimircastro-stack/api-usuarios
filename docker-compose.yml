@@ -1,0 +1,44 @@
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: sgcrd-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: sgcrd
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./database/schema.sql:/docker-entrypoint-initdb.d/01-schema.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d sgcrd"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  api:
+    build: .
+    container_name: sgcrd-api
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "3000:3000"
+    environment:
+      PORT: 3000
+      NODE_ENV: production
+      DB_USER: postgres
+      DB_HOST: db
+      DB_NAME: sgcrd
+      DB_PASSWORD: postgres
+      DB_PORT: 5432
+      JWT_SECRET: cambia_este_secreto_en_produccion_minimo_32_caracteres
+      CORS_ORIGIN: "*"
+      RATE_LIMIT_MAX: 300
+      RATE_LIMIT_AUTH_MAX: 20
+
+volumes:
+  postgres_data:

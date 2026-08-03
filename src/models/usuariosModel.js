@@ -1,192 +1,95 @@
 const pool = require('../db');
 
+const CAMPOS_PUBLICOS = 'id, nombre, correo, edad, rol';
 
-// Obtener todos los usuarios
 const obtenerUsuarios = async () => {
-
-    try {
-
-        const resultado = await pool.query(
-            'SELECT * FROM usuarios'
-        );
-
-        return resultado.rows;
-
-    } catch (error) {
-
-        console.log(error);
-        throw error;
-
-    }
-
+    const resultado = await pool.query(
+        `SELECT ${CAMPOS_PUBLICOS} FROM usuarios ORDER BY id`
+    );
+    return resultado.rows;
 };
 
-
-
-// Buscar usuario por ID
 const buscarUsuarioPorId = async (id) => {
-
-    try {
-
-        const resultado = await pool.query(
-            'SELECT * FROM usuarios WHERE id = $1',
-            [id]
-        );
-
-        return resultado.rows[0];
-
-    } catch (error) {
-
-        console.log(error);
-        throw error;
-
-    }
-
+    const resultado = await pool.query(
+        `SELECT ${CAMPOS_PUBLICOS} FROM usuarios WHERE id = $1`,
+        [id]
+    );
+    return resultado.rows[0];
 };
 
-
-
-// Buscar usuario por correo
 const buscarUsuarioPorCorreo = async (correo) => {
-
-    try {
-
-        const resultado = await pool.query(
-            'SELECT * FROM usuarios WHERE correo = $1',
-            [correo]
-        );
-
-        return resultado.rows[0];
-
-    } catch (error) {
-
-        console.log(error);
-        throw error;
-
-    }
-
+    const resultado = await pool.query(
+        'SELECT * FROM usuarios WHERE correo = $1',
+        [correo]
+    );
+    return resultado.rows[0];
 };
 
-
-
-// Buscar correo excluyendo usuario actual
 const buscarUsuarioPorCorreoYId = async (correo, id) => {
-
-    try {
-
-        const resultado = await pool.query(
-            'SELECT * FROM usuarios WHERE correo = $1 AND id != $2',
-            [correo, id]
-        );
-
-        return resultado.rows[0];
-
-    } catch (error) {
-
-        console.log(error);
-        throw error;
-
-    }
-
+    const resultado = await pool.query(
+        'SELECT id FROM usuarios WHERE correo = $1 AND id != $2',
+        [correo, id]
+    );
+    return resultado.rows[0];
 };
 
-
-
-// Crear usuario
 const crearUsuario = async (nombre, correo, edad, password) => {
-
-    try {
-
-        const resultado = await pool.query(
-            'INSERT INTO usuarios (nombre, correo, edad, password) VALUES ($1, $2, $3, $4) RETURNING *',
-            [nombre, correo, edad, password]
-        );
-
-        return resultado.rows[0];
-
-    } catch (error) {
-
-        console.log(error);
-        throw error;
-
-    }
-
+    const resultado = await pool.query(
+        `INSERT INTO usuarios (nombre, correo, edad, password)
+         VALUES ($1, $2, $3, $4)
+         RETURNING ${CAMPOS_PUBLICOS}`,
+        [nombre, correo, edad, password]
+    );
+    return resultado.rows[0];
 };
 
-
-
-// Actualizar usuario
 const actualizarUsuario = async (id, nombre, correo, edad, password) => {
-
-    try {
-
+    if (password) {
         const resultado = await pool.query(
-            'UPDATE usuarios SET nombre=$1, correo=$2, edad=$3, password=$4 WHERE id=$5 RETURNING *',
+            `UPDATE usuarios
+             SET nombre = $1, correo = $2, edad = $3, password = $4
+             WHERE id = $5
+             RETURNING ${CAMPOS_PUBLICOS}`,
             [nombre, correo, edad, password, id]
         );
-
         return resultado.rows[0];
-
-    } catch (error) {
-
-        console.log(error);
-        throw error;
-
     }
 
+    const resultado = await pool.query(
+        `UPDATE usuarios
+         SET nombre = $1, correo = $2, edad = $3
+         WHERE id = $4
+         RETURNING ${CAMPOS_PUBLICOS}`,
+        [nombre, correo, edad, id]
+    );
+    return resultado.rows[0];
 };
 
-
-
-// Eliminar usuario
 const eliminarUsuario = async (id) => {
-
-    try {
-
-        const resultado = await pool.query(
-            'DELETE FROM usuarios WHERE id=$1 RETURNING *',
-            [id]
-        );
-
-        return resultado.rows[0];
-
-    } catch (error) {
-
-        console.log(error);
-        throw error;
-
-    }
-
+    const resultado = await pool.query(
+        `DELETE FROM usuarios WHERE id = $1 RETURNING ${CAMPOS_PUBLICOS}`,
+        [id]
+    );
+    return resultado.rows[0];
 };
 
-
-
-// Buscar usuario para login
 const loginUsuario = async (correo) => {
-
-    try {
-
-        const resultado = await pool.query(
-            'SELECT * FROM usuarios WHERE correo = $1',
-            [correo]
-        );
-
-        return resultado.rows[0];
-
-    } catch (error) {
-
-        console.log(error);
-        throw error;
-
-    }
-
+    const resultado = await pool.query(
+        'SELECT * FROM usuarios WHERE correo = $1',
+        [correo]
+    );
+    return resultado.rows[0];
 };
 
+const buscarUsuarioConPasswordPorId = async (id) => {
+    const resultado = await pool.query(
+        'SELECT id, password FROM usuarios WHERE id = $1',
+        [id]
+    );
+    return resultado.rows[0];
+};
 
-
-// Exportar funciones
 module.exports = {
-
     obtenerUsuarios,
     buscarUsuarioPorId,
     buscarUsuarioPorCorreo,
@@ -194,6 +97,6 @@ module.exports = {
     crearUsuario,
     actualizarUsuario,
     eliminarUsuario,
-    loginUsuario
-
+    loginUsuario,
+    buscarUsuarioConPasswordPorId
 };

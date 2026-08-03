@@ -1,15 +1,16 @@
 const AppError = require('../utils/AppError');
 const {
     esCorreoValido,
+    esEnteroPositivo,
     normalizarCorreo,
     normalizarTexto
 } = require('../utils/validators');
 
-const validarUsuario = (req, res, next) => {
+const validarActualizarUsuario = (req, res, next) => {
     const { nombre, correo, edad, password } = req.body || {};
 
-    if (!nombre || !correo || edad === undefined || edad === null || edad === '' || !password) {
-        return next(new AppError('Todos los campos son obligatorios', 400));
+    if (!nombre || !correo || edad === undefined || edad === null || edad === '') {
+        return next(new AppError('Nombre, correo y edad son obligatorios', 400));
     }
 
     if (normalizarTexto(nombre).length < 3) {
@@ -28,7 +29,7 @@ const validarUsuario = (req, res, next) => {
         return next(new AppError('La edad debe estar entre 1 y 120 años', 400));
     }
 
-    if (password.length < 6) {
+    if (password !== undefined && password !== null && password !== '' && password.length < 6) {
         return next(new AppError('La contraseña debe tener mínimo 6 caracteres', 400));
     }
 
@@ -39,4 +40,4 @@ const validarUsuario = (req, res, next) => {
     return next();
 };
 
-module.exports = validarUsuario;
+module.exports = validarActualizarUsuario;
