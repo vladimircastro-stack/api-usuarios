@@ -1,0 +1,19 @@
+VC DistribuidorPro — LISTO PARA USO REAL
+========================================
+
+El sistema esta LIMPIO. El administrador debe cargar los datos de la empresa.
+
+GUIA COMPLETA: GUIA-ADMIN-INICIO.txt (en esta misma carpeta)
+
+RESUMEN RAPIDO
+--------------
+1. Configuracion — RYV Frutas del Caribe, precio canasto
+2. Productos — agregar frutas
+3. Cocinas — agregar clientes
+4. Facturacion — vender al cliente
+
+ADMIN
+-----
+vladimirnuevo@gmail.com / RYVAdmin2026!
+
+Abrir: icono VC DistribuidorPro en el Escritorio

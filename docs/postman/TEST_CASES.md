@@ -1,6 +1,6 @@
-# Casos de prueba — SGCRD API
+# Casos de prueba — VC DistribuidorPro API
 
-Colección Postman: `SGCRD-api-usuarios.postman_collection.json`
+Colección Postman: `VC-DistribuidorPro-api.postman_collection.json`
 
 Variables recomendadas:
 - `baseUrl`: `http://localhost:3000`

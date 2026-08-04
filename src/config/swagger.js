@@ -4,7 +4,7 @@ const options = {
     definition: {
         openapi: '3.0.3',
         info: {
-            title: 'SGCRD API - api-usuarios',
+            title: 'VC DistribuidorPro API',
             version: '1.0.0',
             description:
                 'API REST para gestión de usuarios, clientes, productos y ventas con autenticación JWT.'

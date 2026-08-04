@@ -2,7 +2,16 @@ const pool = require('../db');
 
 const obtenerProductos = async () => {
     const resultado = await pool.query(
-        'SELECT * FROM productos ORDER BY id'
+        `SELECT * FROM productos
+         WHERE COALESCE(activo, TRUE) = TRUE
+         ORDER BY nombre`
+    );
+    return resultado.rows;
+};
+
+const obtenerTodosProductos = async () => {
+    const resultado = await pool.query(
+        'SELECT * FROM productos ORDER BY nombre'
     );
     return resultado.rows;
 };
@@ -29,14 +38,25 @@ const crearProducto = async (
     unidad_medida,
     cantidad,
     precio_compra,
-    precio_venta
+    precio_venta,
+    stock_minimo,
+    activo
 ) => {
     const resultado = await pool.query(
         `INSERT INTO productos
-         (nombre, categoria, unidad_medida, cantidad, precio_compra, precio_venta)
-         VALUES ($1, $2, $3, $4, $5, $6)
+         (nombre, categoria, unidad_medida, cantidad, precio_compra, precio_venta, stock_minimo, activo)
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
          RETURNING *`,
-        [nombre, categoria, unidad_medida, cantidad, precio_compra, precio_venta]
+        [
+            nombre,
+            categoria,
+            unidad_medida,
+            cantidad,
+            precio_compra,
+            precio_venta,
+            stock_minimo ?? 10,
+            activo !== false
+        ]
     );
     return resultado.rows[0];
 };
@@ -48,7 +68,9 @@ const actualizarProducto = async (
     unidad_medida,
     cantidad,
     precio_compra,
-    precio_venta
+    precio_venta,
+    stock_minimo,
+    activo
 ) => {
     const resultado = await pool.query(
         `UPDATE productos
@@ -57,17 +79,29 @@ const actualizarProducto = async (
              unidad_medida = $3,
              cantidad = $4,
              precio_compra = $5,
-             precio_venta = $6
-         WHERE id = $7
+             precio_venta = $6,
+             stock_minimo = $7,
+             activo = $8
+         WHERE id = $9
          RETURNING *`,
-        [nombre, categoria, unidad_medida, cantidad, precio_compra, precio_venta, id]
+        [
+            nombre,
+            categoria,
+            unidad_medida,
+            cantidad,
+            precio_compra,
+            precio_venta,
+            stock_minimo ?? 10,
+            activo !== false,
+            id
+        ]
     );
     return resultado.rows[0];
 };
 
 const eliminarProducto = async (id) => {
     const resultado = await pool.query(
-        'DELETE FROM productos WHERE id = $1 RETURNING *',
+        `UPDATE productos SET activo = FALSE WHERE id = $1 RETURNING *`,
         [id]
     );
     return resultado.rows[0];
@@ -79,6 +113,7 @@ const descontarInventario = async (client, producto_id, cantidad) => {
          SET cantidad = cantidad - $1
          WHERE id = $2
            AND cantidad >= $1
+           AND COALESCE(activo, TRUE) = TRUE
          RETURNING *`,
         [cantidad, producto_id]
     );
@@ -87,6 +122,7 @@ const descontarInventario = async (client, producto_id, cantidad) => {
 
 module.exports = {
     obtenerProductos,
+    obtenerTodosProductos,
     buscarProductoPorId,
     buscarProductoPorIdConCliente,
     crearProducto,

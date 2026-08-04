@@ -1,4 +1,4 @@
--- Esquema inicial de SGCRD (PostgreSQL).
+-- Esquema inicial VC DistribuidorPro (PostgreSQL).
 -- Ejecútalo una sola vez dentro de la base de datos configurada en .env.
 
 BEGIN;

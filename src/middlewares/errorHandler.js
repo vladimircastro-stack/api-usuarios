@@ -5,7 +5,7 @@ const errorHandler = (error, req, res, next) => {
         return next(error);
     }
 
-    console.error('ERROR DEL SERVIDOR:', error);
+    console.error('ERROR DEL SERVIDOR:', process.env.NODE_ENV === 'production' ? error.message : error);
 
     if (error instanceof AppError) {
         return res.status(error.statusCode).json({

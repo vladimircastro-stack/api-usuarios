@@ -1,6 +1,6 @@
 {
   "info": {
-    "name": "SGCRD API - api-usuarios",
+    "name": "VC DistribuidorPro API - api-usuarios",
     "description": "Colección completa para probar usuarios, clientes, productos y ventas.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },

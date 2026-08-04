@@ -9,6 +9,12 @@ const {
     eliminarCliente
 } = require('../models/clientesModel');
 
+const parseLimite = (body) => {
+    if (body.limite_credito === undefined) return undefined;
+    if (body.limite_credito === null || body.limite_credito === '') return null;
+    return Number(body.limite_credito);
+};
+
 const mostrarClientes = asyncHandler(async (req, res) => {
     const clientes = await obtenerClientes();
     sendSuccess(res, {
@@ -31,8 +37,13 @@ const buscarCliente = asyncHandler(async (req, res) => {
 });
 
 const crearClienteController = asyncHandler(async (req, res) => {
-    const { nombre, telefono, correo, direccion } = req.body;
-    const cliente = await crearCliente(nombre, telefono, correo, direccion);
+    const { nombre, telefono, correo, direccion, tipo, contacto, horario_entrega } = req.body;
+    const limite = req.usuario.rol === 'admin' && req.body.limite_credito !== undefined
+        ? parseLimite(req.body)
+        : null;
+    const cliente = await crearCliente(
+        nombre, telefono, correo, direccion, tipo, contacto, horario_entrega, limite
+    );
 
     sendSuccess(res, {
         mensaje: 'Cliente creado correctamente',
@@ -43,12 +54,21 @@ const crearClienteController = asyncHandler(async (req, res) => {
 
 const actualizarClienteController = asyncHandler(async (req, res) => {
     const { id } = req.params;
-    const { nombre, telefono, correo, direccion } = req.body;
-    const cliente = await actualizarCliente(id, nombre, telefono, correo, direccion);
+    const { nombre, telefono, correo, direccion, tipo, contacto, horario_entrega } = req.body;
 
-    if (!cliente) {
+    const actual = await buscarClientePorId(id);
+    if (!actual) {
         throw new AppError('Cliente no encontrado', 404);
     }
+
+    let limite = actual.limite_credito != null ? Number(actual.limite_credito) : null;
+    if (req.usuario.rol === 'admin' && req.body.limite_credito !== undefined) {
+        limite = parseLimite(req.body);
+    }
+
+    const cliente = await actualizarCliente(
+        id, nombre, telefono, correo, direccion, tipo, contacto, horario_entrega, limite
+    );
 
     sendSuccess(res, {
         mensaje: 'Cliente actualizado correctamente',

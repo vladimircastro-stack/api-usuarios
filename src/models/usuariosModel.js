@@ -33,35 +33,37 @@ const buscarUsuarioPorCorreoYId = async (correo, id) => {
     return resultado.rows[0];
 };
 
-const crearUsuario = async (nombre, correo, edad, password) => {
+const ROLES_VALIDOS = ['admin', 'vendedor', 'almacen', 'repartidor', 'usuario'];
+
+const crearUsuario = async (nombre, correo, edad, password, rol = 'usuario') => {
+    const rolFinal = ROLES_VALIDOS.includes(rol) ? rol : 'usuario';
     const resultado = await pool.query(
-        `INSERT INTO usuarios (nombre, correo, edad, password)
-         VALUES ($1, $2, $3, $4)
+        `INSERT INTO usuarios (nombre, correo, edad, password, rol)
+         VALUES ($1, $2, $3, $4, $5)
          RETURNING ${CAMPOS_PUBLICOS}`,
-        [nombre, correo, edad, password]
+        [nombre, correo, edad, password, rolFinal]
     );
     return resultado.rows[0];
 };
 
-const actualizarUsuario = async (id, nombre, correo, edad, password) => {
+const actualizarUsuario = async (id, nombre, correo, edad, password, rol) => {
+    const params = [nombre, correo, edad];
+    let sql = `UPDATE usuarios SET nombre = $1, correo = $2, edad = $3`;
+
     if (password) {
-        const resultado = await pool.query(
-            `UPDATE usuarios
-             SET nombre = $1, correo = $2, edad = $3, password = $4
-             WHERE id = $5
-             RETURNING ${CAMPOS_PUBLICOS}`,
-            [nombre, correo, edad, password, id]
-        );
-        return resultado.rows[0];
+        params.push(password);
+        sql += `, password = $${params.length}`;
     }
 
-    const resultado = await pool.query(
-        `UPDATE usuarios
-         SET nombre = $1, correo = $2, edad = $3
-         WHERE id = $4
-         RETURNING ${CAMPOS_PUBLICOS}`,
-        [nombre, correo, edad, id]
-    );
+    if (rol && ROLES_VALIDOS.includes(rol)) {
+        params.push(rol);
+        sql += `, rol = $${params.length}`;
+    }
+
+    params.push(id);
+    sql += ` WHERE id = $${params.length} RETURNING ${CAMPOS_PUBLICOS}`;
+
+    const resultado = await pool.query(sql, params);
     return resultado.rows[0];
 };
 
@@ -81,6 +83,11 @@ const loginUsuario = async (correo) => {
     return resultado.rows[0];
 };
 
+const contarUsuarios = async () => {
+    const resultado = await pool.query('SELECT COUNT(*)::int AS total FROM usuarios');
+    return resultado.rows[0].total;
+};
+
 const buscarUsuarioConPasswordPorId = async (id) => {
     const resultado = await pool.query(
         'SELECT id, password FROM usuarios WHERE id = $1',
@@ -98,5 +105,7 @@ module.exports = {
     actualizarUsuario,
     eliminarUsuario,
     loginUsuario,
-    buscarUsuarioConPasswordPorId
+    buscarUsuarioConPasswordPorId,
+    contarUsuarios,
+    ROLES_VALIDOS
 };

@@ -1,36 +1,37 @@
 const jwt = require('jsonwebtoken');
 const jwtConfig = require('../config/jwt');
+const AppError = require('../utils/AppError');
+const { buscarUsuarioPorId } = require('../models/usuariosModel');
 
-const auth = (req, res, next) => {
-    const authHeader = req.headers.authorization;
-
-    if (!authHeader) {
-        return res.status(401).json({
-            exito: false,
-            mensaje: 'No llegó Authorization'
-        });
-    }
-
-    const partes = authHeader.split(' ');
-
-    if (partes.length !== 2 || partes[0] !== 'Bearer') {
-        return res.status(401).json({
-            exito: false,
-            mensaje: 'Formato incorrecto. Use Bearer token'
-        });
-    }
-
-    const token = partes[1];
-
+const auth = async (req, res, next) => {
     try {
-        const usuario = jwt.verify(token, jwtConfig.secret);
+        const authHeader = req.headers.authorization;
+
+        if (!authHeader) {
+            throw new AppError('No llegó Authorization', 401);
+        }
+
+        const partes = authHeader.split(' ');
+
+        if (partes.length !== 2 || partes[0] !== 'Bearer') {
+            throw new AppError('Formato incorrecto. Use Bearer token', 401);
+        }
+
+        const token = partes[1];
+        const decoded = jwt.verify(token, jwtConfig.secret);
+        const usuario = await buscarUsuarioPorId(decoded.id);
+
+        if (!usuario) {
+            throw new AppError('Usuario no encontrado o inactivo', 401);
+        }
+
         req.usuario = usuario;
         next();
     } catch (error) {
-        return res.status(401).json({
-            exito: false,
-            mensaje: 'Token inválido'
-        });
+        if (error instanceof AppError) {
+            return next(error);
+        }
+        return next(new AppError('Token inválido', 401));
     }
 };
 

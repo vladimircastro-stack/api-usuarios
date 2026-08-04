@@ -10,7 +10,9 @@ const {
 } = require('../models/productosModel');
 
 const mostrarProductos = asyncHandler(async (req, res) => {
-    const productos = await obtenerProductos();
+    const productos = req.query.todos === '1' && req.usuario.rol === 'admin'
+        ? await require('../models/productosModel').obtenerTodosProductos()
+        : await obtenerProductos();
     sendSuccess(res, {
         mensaje: 'Productos encontrados correctamente',
         datos: productos
@@ -37,7 +39,9 @@ const crearProductoController = asyncHandler(async (req, res) => {
         unidad_medida,
         cantidad,
         precio_compra,
-        precio_venta
+        precio_venta,
+        stock_minimo,
+        activo
     } = req.body;
 
     const producto = await crearProducto(
@@ -46,7 +50,9 @@ const crearProductoController = asyncHandler(async (req, res) => {
         unidad_medida,
         cantidad,
         precio_compra,
-        precio_venta
+        precio_venta,
+        stock_minimo,
+        activo
     );
 
     sendSuccess(res, {
@@ -64,7 +70,9 @@ const actualizarProductoController = asyncHandler(async (req, res) => {
         unidad_medida,
         cantidad,
         precio_compra,
-        precio_venta
+        precio_venta,
+        stock_minimo,
+        activo
     } = req.body;
 
     const producto = await actualizarProducto(
@@ -74,7 +82,9 @@ const actualizarProductoController = asyncHandler(async (req, res) => {
         unidad_medida,
         cantidad,
         precio_compra,
-        precio_venta
+        precio_venta,
+        stock_minimo,
+        activo
     );
 
     if (!producto) {
@@ -95,7 +105,7 @@ const eliminarProductoController = asyncHandler(async (req, res) => {
     }
 
     sendSuccess(res, {
-        mensaje: 'Producto eliminado correctamente',
+        mensaje: 'Producto desactivado correctamente',
         datos: producto
     });
 });

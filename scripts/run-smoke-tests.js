@@ -60,7 +60,7 @@ function request(method, path, body, token) {
 async function main() {
     const results = [];
 
-    console.log('=== PRUEBAS SGCRD API ===\n');
+    console.log('=== PRUEBAS VC DistribuidorPro API ===\n');
 
     const health = await request('GET', '/health');
     results.push(['GET /health', health.status, health.body.exito]);

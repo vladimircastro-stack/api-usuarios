@@ -11,6 +11,10 @@ const verificarRol = require('../middlewares/rol');
 const propietarioOAdmin = require('../middlewares/propietarioOAdmin');
 const { sendSuccess } = require('../utils/response');
 
+const permitirRegistro = require('../middlewares/permitirRegistro');
+const asyncHandler = require('../utils/asyncHandler');
+const AppError = require('../utils/AppError');
+const { buscarUsuarioPorId } = require('../models/usuariosModel');
 const {
     mostrarUsuarios,
     buscarUsuario,
@@ -39,7 +43,7 @@ const {
  *       201:
  *         description: Usuario creado
  */
-router.post('/usuarios', validarUsuario, crearUsuario);
+router.post('/usuarios', permitirRegistro, validarUsuario, crearUsuario);
 
 /**
  * @openapi
@@ -60,8 +64,8 @@ router.post('/usuarios', validarUsuario, crearUsuario);
  */
 router.post('/login', validarLogin, loginUsuario);
 
-router.get('/usuarios', auth, mostrarUsuarios);
-router.get('/usuarios/:id', auth, validarId, buscarUsuario);
+router.get('/usuarios', auth, verificarRol('admin'), mostrarUsuarios);
+router.get('/usuarios/:id', auth, validarId, propietarioOAdmin, buscarUsuario);
 router.put(
     '/usuarios/:id',
     auth,
@@ -78,12 +82,16 @@ router.delete(
     eliminarUsuario
 );
 
-router.get('/perfil', auth, (req, res) => {
+router.get('/perfil', auth, asyncHandler(async (req, res) => {
+    const usuario = await buscarUsuarioPorId(req.usuario.id);
+    if (!usuario) {
+        throw new AppError('Usuario no encontrado', 404);
+    }
     sendSuccess(res, {
         mensaje: 'Acceso permitido',
-        usuario: req.usuario
+        usuario
     });
-});
+}));
 
 router.get('/admin', auth, verificarRol('admin'), (req, res) => {
     sendSuccess(res, {

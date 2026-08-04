@@ -1,4 +1,4 @@
-# SGCRD API — api-usuarios
+# VC DistribuidorPro API — api-usuarios
 
 API REST profesional para gestión de usuarios, clientes, productos y ventas. Construida con **Node.js**, **Express 5**, **PostgreSQL** y autenticación **JWT**.
 
@@ -63,7 +63,7 @@ npm run docker:down
 | `NODE_ENV` | Entorno de ejecución | `development` |
 | `DB_USER` | Usuario PostgreSQL | `postgres` |
 | `DB_HOST` | Host PostgreSQL | `localhost` |
-| `DB_NAME` | Nombre de la BD | `sgcrd` |
+| `DB_NAME` | Nombre de la BD | `api_usuarios` |
 | `DB_PASSWORD` | Contraseña PostgreSQL | `postgres` |
 | `DB_PORT` | Puerto PostgreSQL | `5432` |
 | `JWT_SECRET` | Secreto para firmar JWT (mín. 32 chars en prod) | `tu_secreto_largo` |
@@ -182,7 +182,7 @@ api-usuarios/
 
 Importar la colección:
 
-`docs/postman/SGCRD-api-usuarios.postman_collection.json`
+`docs/postman/VC-DistribuidorPro-api.postman_collection.json`
 
 Ver casos de prueba detallados en:
 

@@ -1,0 +1,55 @@
+VC DistribuidorPro — GUIA PARA EL ADMINISTRADOR
+===============================================
+
+El sistema esta LIMPIO. No hay cocinas, productos ni ventas de prueba.
+Usted debe cargar los datos reales de RYV Frutas del Caribe.
+
+CUENTA ADMINISTRADOR
+--------------------
+Correo:     vladimirnuevo@gmail.com
+            admin@ryvfrutas.com
+Contrasena: RYVAdmin2026!
+(Cambiar despues del primer uso)
+
+ORDEN RECOMENDADO (primera vez)
+-------------------------------
+1. CONFIGURACION
+   - Nombre: RYV Frutas del Caribe
+   - Precio del canasto (deposito por canasto prestado)
+   - Stock minimo por defecto
+
+2. PRODUCTOS
+   - Agregar cada fruta: guineo, papaya, lechosa, sandia, melon, etc.
+   - Unidad: canasto (guineo) o lb (frutas que se pesan)
+   - Precio de referencia (en factura puede variar)
+
+3. COCINAS
+   - Agregar cada cliente / cocina industrial
+   - Nombre, telefono, direccion, contacto, horario de entrega
+   - Limite de credito (opcional, solo admin)
+
+4. USUARIOS (opcional)
+   - Revisar vendedor, repartidor, almacen
+   - Cambiar contrasenas
+
+5. OPERACION DIARIA
+   - Facturacion — crear factura al cliente
+   - Entregas — repartidor marca en ruta / entregada
+   - Canastos — control de canastos vacios y por peso
+   - Cuentas — cobrar credito pendiente
+   - Reportes — ventas del mes
+
+EQUIPO
+------
+Vendedor:    vendedor@ryvfrutas.com    / RYVVende2026!
+Repartidor:  repartidor@ryvfrutas.com  / RYVReparto2026!
+Almacen:     almacen@ryvfrutas.com     / RYVStock2026!
+
+ABRIR EL PROGRAMA
+-----------------
+Icono del Escritorio: VC DistribuidorPro
+Se abre solo al encender la PC (esperar ~1 minuto).
+
+SOPORTE
+-------
+Detalle de usuarios: USUARIOS-EMPRESA.md

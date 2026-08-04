@@ -1,4 +1,4 @@
-# Guía de Instalación SGCRD API
+# Guía de Instalación VC DistribuidorPro API
 ## Sistema de Gestión — PC de la Empresa
 
 **Versión:** 1.0  
@@ -9,7 +9,7 @@
 
 ## 1. ¿Qué es este sistema?
 
-SGCRD API es el programa de gestión para la empresa familiar. Permite:
+VC DistribuidorPro API es el programa de gestión para la empresa. Permite:
 
 - Registrar usuarios e iniciar sesión
 - Gestionar **clientes**
@@ -322,7 +322,7 @@ El total se calcula automáticamente.
 
 - **Repositorio GitHub:** https://github.com/vladimircastro-stack/api-usuarios
 - **Documentación API:** http://localhost:3000/api-docs
-- **Colección Postman:** `docs/postman/SGCRD-api-usuarios.postman_collection.json`
+- **Colección Postman:** `docs/postman/VC-DistribuidorPro-api.postman_collection.json`
 
 ---
 
@@ -344,4 +344,4 @@ Marcar cada paso al completarlo:
 
 ---
 
-*SGCRD — Sistema de Gestión Empresa Familiar*
+*VC DistribuidorPro — by VC Software*

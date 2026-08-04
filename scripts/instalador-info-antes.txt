@@ -1,0 +1,11 @@
+REQUISITOS ANTES DE INSTALAR
+============================
+
+1. Node.js 18+ (https://nodejs.org)
+2. PostgreSQL 14+ (https://postgresql.org/download/windows/)
+
+Durante la instalacion se pedira la contraseña de PostgreSQL.
+
+Después podra abrir VC DistribuidorPro desde el Escritorio o el menu Inicio.
+
+Usuarios iniciales: vea GUIA-ADMIN-INICIO.txt en la carpeta de instalacion.

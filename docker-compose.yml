@@ -12,6 +12,7 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ./database/schema.sql:/docker-entrypoint-initdb.d/01-schema.sql:ro
+      - ./database/migrations/002_distribuidora.sql:/docker-entrypoint-initdb.d/02-migracion.sql:ro
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres -d sgcrd"]
       interval: 10s
@@ -19,7 +20,9 @@ services:
       retries: 5
 
   api:
-    build: .
+    build:
+      context: ..
+      dockerfile: api-usuarios/Dockerfile
     container_name: sgcrd-api
     restart: unless-stopped
     depends_on:

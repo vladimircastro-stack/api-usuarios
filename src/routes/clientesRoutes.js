@@ -3,9 +3,10 @@ const express = require('express');
 const router = express.Router();
 
 const auth = require('../middlewares/auth');
-const verificarRol = require('../middlewares/rol');
 const validarId = require('../middlewares/validarId');
 const validarCliente = require('../middlewares/validarCliente');
+const { verificarPermiso } = require('../middlewares/permisos');
+const verificarRol = require('../middlewares/rol');
 
 const {
     mostrarClientes,
@@ -15,14 +16,14 @@ const {
     eliminarCliente
 } = require('../controllers/clientesController');
 
-router.get('/', auth, mostrarClientes);
-router.get('/:id', auth, validarId, buscarCliente);
-router.post('/', auth, validarCliente, crearCliente);
+router.get('/', auth, verificarPermiso('clientes:read'), mostrarClientes);
+router.get('/:id', auth, validarId, verificarPermiso('clientes:read'), buscarCliente);
+router.post('/', auth, verificarPermiso('clientes:write'), validarCliente, crearCliente);
 router.put(
     '/:id',
     auth,
     validarId,
-    verificarRol('admin'),
+    verificarPermiso('clientes:write'),
     validarCliente,
     actualizarCliente
 );

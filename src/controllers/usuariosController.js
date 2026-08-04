@@ -13,8 +13,12 @@ const {
     crearUsuario,
     actualizarUsuario,
     eliminarUsuario,
-    loginUsuario
+    loginUsuario,
+    contarUsuarios,
+    ROLES_VALIDOS
 } = require('../models/usuariosModel');
+
+const ROLES = ROLES_VALIDOS;
 
 const mostrarUsuarios = asyncHandler(async (req, res) => {
     const usuarios = await obtenerUsuarios();
@@ -38,15 +42,20 @@ const buscarUsuario = asyncHandler(async (req, res) => {
 });
 
 const crearUsuarioController = asyncHandler(async (req, res) => {
-    const { nombre, correo, edad, password } = req.body;
+    const { nombre, correo, edad, password, rol } = req.body;
     const existe = await buscarUsuarioPorCorreo(correo);
 
     if (existe) {
         throw new AppError('El correo ya está registrado', 400);
     }
 
+    let rolAsignado = 'usuario';
+    if (req.usuario?.rol === 'admin' && rol && ROLES.includes(rol)) {
+        rolAsignado = rol;
+    }
+
     const passwordEncriptada = await bcrypt.hash(password, 10);
-    const usuario = await crearUsuario(nombre, correo, edad, passwordEncriptada);
+    const usuario = await crearUsuario(nombre, correo, edad, passwordEncriptada, rolAsignado);
 
     sendSuccess(res, {
         mensaje: 'Usuario creado correctamente',
@@ -57,7 +66,7 @@ const crearUsuarioController = asyncHandler(async (req, res) => {
 
 const actualizarUsuarioController = asyncHandler(async (req, res) => {
     const id = Number(req.params.id);
-    const { nombre, correo, edad, password } = req.body;
+    const { nombre, correo, edad, password, rol } = req.body;
 
     const usuarioActual = await buscarUsuarioPorId(id);
 
@@ -77,12 +86,18 @@ const actualizarUsuarioController = asyncHandler(async (req, res) => {
         passwordNueva = await bcrypt.hash(password, 10);
     }
 
+    let rolNuevo;
+    if (req.usuario.rol === 'admin' && rol && ROLES.includes(rol)) {
+        rolNuevo = rol;
+    }
+
     const usuario = await actualizarUsuario(
         id,
         nombre,
         correo,
         edad,
-        passwordNueva
+        passwordNueva,
+        rolNuevo
     );
 
     sendSuccess(res, {

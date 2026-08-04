@@ -12,7 +12,9 @@ const validarProducto = (req, res, next) => {
         unidad_medida,
         cantidad,
         precio_compra,
-        precio_venta
+        precio_venta,
+        stock_minimo,
+        activo
     } = req.body || {};
 
     if (!nombre || normalizarTexto(nombre) === '') {
@@ -42,6 +44,14 @@ const validarProducto = (req, res, next) => {
     req.body.nombre = normalizarTexto(nombre);
     req.body.categoria = normalizarTexto(categoria);
     req.body.unidad_medida = normalizarTexto(unidad_medida);
+
+    if (stock_minimo != null && !esNumeroNoNegativo(stock_minimo)) {
+        return next(new AppError('Stock mínimo inválido', 400));
+    }
+
+    if (activo != null && typeof activo !== 'boolean') {
+        return next(new AppError('El campo activo debe ser booleano', 400));
+    }
 
     return next();
 };
